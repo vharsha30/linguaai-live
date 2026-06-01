@@ -1,0 +1,1908 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harsha AI — Language Tool</title>
+
+  <!-- Fonts: DM Serif Display + DM Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ================================================
+       CSS VARIABLES — Light & Dark themes
+    ================================================ */
+    :root {
+      --bg:           #f0ede8;
+      --bg2:          #e8e3db;
+      --surface:      #faf8f4;
+      --surface2:     #eeeadf;
+      --border:       #cdc7bc;
+      --text:         #1c1917;
+      --text-muted:   #78716c;
+      --accent:       #0f766e;       /* teal */
+      --accent-hover: #0d6460;
+      --accent2:      #b45309;       /* amber */
+      --accent-soft:  #ccfbf1;
+      --shadow-sm:    0 1px 4px rgba(0,0,0,.08);
+      --shadow-md:    0 4px 20px rgba(0,0,0,.10);
+      --radius:       12px;
+      --font-size:    15px;
+      --transition:   .22s ease;
+    }
+    [data-theme="dark"] {
+      --bg:           #0c0a09;
+      --bg2:          #161412;
+      --surface:      #1c1917;
+      --surface2:     #292524;
+      --border:       #3c3632;
+      --text:         #f5f0eb;
+      --text-muted:   #a8a29e;
+      --accent:       #2dd4bf;
+      --accent-hover: #5eead4;
+      --accent2:      #fbbf24;
+      --accent-soft:  #042f2e;
+      --shadow-sm:    0 1px 4px rgba(0,0,0,.3);
+      --shadow-md:    0 4px 20px rgba(0,0,0,.4);
+    }
+    [data-large="true"] { --font-size: 19px; }
+
+    /* ================================================
+       BASE
+    ================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: var(--font-size); scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ================================================
+       HEADER
+    ================================================ */
+    header {
+      position: sticky; top: 0; z-index: 200;
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: .75rem 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand {
+      display: flex; align-items: center; gap: .6rem;
+      text-decoration: none; color: inherit;
+    }
+    .brand-icon {
+      width: 36px; height: 36px;
+      background: var(--accent);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .brand-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.45rem;
+      letter-spacing: -.3px;
+      line-height: 1;
+    }
+    .brand-name em { color: var(--accent); font-style: normal; }
+    .brand-tag {
+      font-size: .65rem;
+      font-weight: 600;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: .15rem .5rem;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      margin-left: .3rem;
+      vertical-align: middle;
+    }
+
+    /* header toggle buttons */
+    .hdr-btns { display: flex; gap: .5rem; }
+    .hbtn {
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      color: var(--text);
+      border-radius: 8px;
+      padding: .38rem .7rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .78rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex; align-items: center; gap: .3rem;
+      transition: background var(--transition), border-color var(--transition);
+    }
+    .hbtn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ================================================
+       TAB BAR
+    ================================================ */
+    .tabbar {
+      background: var(--surface);
+      border-bottom: 1.5px solid var(--border);
+      display: flex;
+      padding: 0 1.5rem;
+      overflow-x: auto;
+    }
+    .tabbar::-webkit-scrollbar { display: none; }
+    .tbtn {
+      background: none;
+      border: none;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -1.5px;
+      padding: .8rem 1.2rem;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .88rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex; align-items: center; gap: .4rem;
+      transition: color var(--transition), border-color var(--transition);
+    }
+    .tbtn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tbtn:hover:not(.active) { color: var(--text); }
+
+    /* ================================================
+       LAYOUT
+    ================================================ */
+    main { max-width: 1100px; margin: 0 auto; padding: 1.8rem 1.4rem 3rem; }
+    .panel { display: none; }
+    .panel.active { display: block; animation: fadeIn .2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+    /* ================================================
+       CARDS
+    ================================================ */
+    .card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.4rem;
+      box-shadow: var(--shadow-md);
+    }
+    .card + .card { margin-top: 1rem; }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+      color: var(--text);
+    }
+    .pill-tag {
+      font-size: .65rem;
+      font-weight: 700;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      border-radius: 999px;
+      padding: .15rem .55rem;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .pill-tag.amber {
+      background: #fef3c7;
+      color: var(--accent2);
+      border-color: var(--accent2);
+    }
+    [data-theme="dark"] .pill-tag.amber {
+      background: #292100;
+    }
+
+    /* ================================================
+       FORM ELEMENTS
+    ================================================ */
+    label.lbl {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--text-muted);
+      margin-bottom: .4rem;
+    }
+    select, textarea {
+      width: 100%;
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color var(--transition);
+    }
+    select:focus, textarea:focus { border-color: var(--accent); }
+    select { padding: .55rem .8rem; cursor: pointer; }
+    textarea {
+      padding: .8rem 1rem;
+      min-height: 170px;
+      resize: vertical;
+      line-height: 1.75;
+    }
+    textarea[readonly] { cursor: default; background: var(--bg); }
+    textarea::placeholder { color: var(--text-muted); }
+
+    .char-count {
+      text-align: right;
+      font-size: .72rem;
+      color: var(--text-muted);
+      margin-top: .3rem;
+    }
+    .char-count.warn { color: #ef4444; }
+
+    /* ================================================
+       TRANSLATE GRID
+    ================================================ */
+    .tr-grid {
+      display: grid;
+      grid-template-columns: 1fr 52px 1fr;
+      gap: .8rem;
+      align-items: start;
+    }
+    .tr-mid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      padding-bottom: .4rem;
+      gap: .5rem;
+      min-height: 270px;
+    }
+    .swap-btn {
+      width: 44px; height: 44px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background var(--transition), transform var(--transition);
+      box-shadow: 0 2px 12px rgba(15,118,110,.3);
+    }
+    .swap-btn:hover { background: var(--accent-hover); transform: rotate(180deg); }
+
+    /* ================================================
+       BUTTONS
+    ================================================ */
+    .actions { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem; }
+    .btn {
+      padding: .5rem 1rem;
+      border-radius: 8px;
+      border: 1.5px solid transparent;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .83rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: .35rem;
+      transition: all var(--transition);
+      white-space: nowrap;
+    }
+    .btn:active { transform: scale(.96); }
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--accent); color: #fff;
+      border-color: var(--accent);
+      box-shadow: 0 2px 10px rgba(15,118,110,.25);
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+    .btn-outline {
+      background: transparent;
+      border-color: var(--border);
+      color: var(--text);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-wa {
+      background: #25d366; color: #fff; border-color: #25d366;
+    }
+    .btn-wa:hover { background: #8b5cf6; border-color: #8b5cf6 }
+    .btn-em {
+      background: var(--accent2); color: #fff; border-color: var(--accent2);
+    }
+    .btn-em:hover { opacity: .88; }
+
+    /* ================================================
+       STATUS BAR
+    ================================================ */
+    .statusbar {
+      margin-top: .6rem;
+      font-size: .78rem;
+      color: var(--text-muted);
+      display: flex; align-items: center; gap: .5rem;
+      min-height: 1.4em;
+    }
+    .spin {
+      width: 13px; height: 13px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .65s linear infinite;
+      display: none; flex-shrink: 0;
+    }
+    .spin.on { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ================================================
+       PROGRESS BAR (translation animation)
+    ================================================ */
+    .progress-wrap {
+      height: 3px;
+      background: var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: .5rem;
+      display: none;
+    }
+    .progress-wrap.on { display: block; }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      border-radius: 999px;
+      width: 0%;
+      transition: width .3s ease;
+    }
+
+    /* ================================================
+       SUMMARY MODE PILLS
+    ================================================ */
+    .mode-pills { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: .9rem; }
+    .mpill {
+      padding: .38rem .85rem;
+      border-radius: 999px;
+      border: 1.5px solid var(--border);
+      background: var(--surface2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .mpill.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .mpill:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+    /* ================================================
+       OUTPUT BOX
+    ================================================ */
+    .output-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      min-height: 110px;
+      font-size: .97rem;
+      line-height: 1.8;
+      color: var(--text);
+      white-space: pre-wrap;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .output-box .placeholder {
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ================================================
+       HISTORY
+    ================================================ */
+    .hist-grid { display: flex; flex-direction: column; gap: .75rem; }
+    .hist-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.2rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .4rem 1.2rem;
+    }
+    .hist-meta {
+      grid-column: 1 / -1;
+      font-size: .7rem;
+      color: var(--text-muted);
+      margin-bottom: .2rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .hist-lang {
+      font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--accent); margin-bottom: .2rem;
+    }
+    .hist-text { font-size: .9rem; color: var(--text); line-height: 1.6; }
+    .empty-hist {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--text-muted); font-size: .95rem;
+    }
+    .empty-hist .icon { font-size: 2.2rem; margin-bottom: .5rem; }
+
+    /* ================================================
+       API KEY NOTICE BANNER
+    ================================================ */
+    .notice {
+      background: #fef9c3;
+      border: 1.5px solid #fde047;
+      border-radius: 8px;
+      padding: .6rem 1rem;
+      font-size: .8rem;
+      color: #854d0e;
+      margin-bottom: 1rem;
+      display: flex; gap: .5rem; align-items: flex-start;
+    }
+    [data-theme="dark"] .notice {
+      background: #1c1500; color: #fbbf24; border-color: #854d0e;
+    }
+
+    /* ================================================
+       TOAST
+    ================================================ */
+    #toast {
+      position: fixed; bottom: 1.8rem; left: 50%;
+      transform: translateX(-50%) translateY(60px);
+      background: var(--text); color: var(--bg);
+      padding: .6rem 1.3rem;
+      border-radius: 999px;
+      font-size: .84rem; font-weight: 600;
+      opacity: 0; pointer-events: none;
+      transition: all .28s cubic-bezier(.34,1.56,.64,1);
+      z-index: 9999; white-space: nowrap;
+      box-shadow: var(--shadow-md);
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ================================================
+       RESPONSIVE
+    ================================================ */
+    @media (max-width: 680px) {
+      header { padding: .65rem 1rem; }
+      .brand-name { font-size: 1.25rem; }
+      main { padding: 1rem .8rem 2.5rem; }
+      .tr-grid { grid-template-columns: 1fr; }
+      .tr-mid {
+        flex-direction: row; min-height: auto;
+        justify-content: center; padding-bottom: 0;
+      }
+      .swap-btn { transform: rotate(90deg); }
+      .swap-btn:hover { transform: rotate(270deg); }
+      .hist-card { grid-template-columns: 1fr; }
+    }
+
+    /* copy flash */
+    @keyframes copyFlash {
+      0%   { background: var(--accent-soft); }
+      100% { background: var(--bg); }
+    }
+    .copy-flash { animation: copyFlash .4s ease; }
+
+    /* ================================================
+       TONE BADGE
+    ================================================ */
+    .tone-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      padding: .28rem .65rem;
+      border-radius: 999px;
+      font-size: .72rem; font-weight: 700;
+      letter-spacing: .05em; text-transform: uppercase;
+      border: 1.5px solid transparent;
+      transition: all var(--transition);
+      opacity: 0;
+    }
+    .tone-badge.visible { opacity: 1; }
+    .tone-badge.formal     { background: #dbeafe; color: #1d4ed8; border-color: #93c5fd; }
+    .tone-badge.casual     { background: #dcfce7; color: #15803d; border-color: #86efac; }
+    .tone-badge.emotional  { background: #fce7f3; color: #be185d; border-color: #f9a8d4; }
+    .tone-badge.technical  { background: #ede9fe; color: #6d28d9; border-color: #c4b5fd; }
+    [data-theme="dark"] .tone-badge.formal    { background: #1e3a5f; color: #93c5fd; border-color: #1d4ed8; }
+    [data-theme="dark"] .tone-badge.casual    { background: #14532d; color: #86efac; border-color: #15803d; }
+    [data-theme="dark"] .tone-badge.emotional { background: #500724; color: #f9a8d4; border-color: #be185d; }
+    [data-theme="dark"] .tone-badge.technical { background: #2e1065; color: #c4b5fd; border-color: #6d28d9; }
+
+    /* ================================================
+       WORD / CHAR LIMIT BAR
+    ================================================ */
+    .limit-bar-wrap {
+      height: 3px; background: var(--border);
+      border-radius: 999px; overflow: hidden;
+      margin-top: .35rem;
+    }
+    .limit-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #22d3ee);
+      border-radius: 999px;
+      width: 0%;
+      transition: width .2s ease, background .2s ease;
+    }
+    .limit-bar.warn  { background: linear-gradient(90deg, #f59e0b, #ef4444); }
+    .limit-bar.over  { background: #ef4444; }
+
+    /* ================================================
+       FORMALITY SWITCHER
+    ================================================ */
+    .formality-section {
+      margin-top: 1.2rem;
+      display: none;
+    }
+    .formality-section.visible { display: block; animation: fadeIn .25s ease; }
+    .formality-title {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: .7rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .formality-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .7rem;
+    }
+    @media (max-width: 680px) { .formality-grid { grid-template-columns: 1fr; } }
+    .formality-card {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      position: relative;
+    }
+    .formality-card-label {
+      font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--accent); margin-bottom: .45rem;
+    }
+    .formality-card-text {
+      font-size: .88rem; line-height: 1.65;
+      color: var(--text); min-height: 60px;
+    }
+    .formality-card-text.loading {
+      color: var(--text-muted); font-style: italic;
+    }
+    .formality-copy {
+      position: absolute; top: .6rem; right: .6rem;
+      background: none; border: none;
+      font-size: .8rem; cursor: pointer; opacity: .45;
+      transition: opacity var(--transition);
+      padding: .15rem .3rem;
+    }
+    .formality-copy:hover { opacity: 1; }
+
+    /* ================================================
+       BACK-TRANSLATION DIFF
+    ================================================ */
+    .backtrans-section {
+      margin-top: 1.2rem;
+      display: none;
+    }
+    .backtrans-section.visible { display: block; animation: fadeIn .25s ease; }
+    .backtrans-title {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: .7rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .accuracy-meter {
+      display: flex; align-items: center; gap: .65rem;
+      margin-bottom: .75rem;
+    }
+    .accuracy-label {
+      font-size: .75rem; font-weight: 600; color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .accuracy-track {
+      flex: 1; height: 8px;
+      background: var(--border);
+      border-radius: 999px; overflow: hidden;
+    }
+    .accuracy-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+      background-size: 200% 100%;
+      transition: background-position .5s ease, width .5s ease;
+    }
+    .accuracy-pct {
+      font-size: .8rem; font-weight: 700;
+      color: var(--accent); min-width: 2.8rem; text-align: right;
+    }
+    .diff-box {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: .85rem 1rem;
+      font-size: .9rem; line-height: 1.85;
+      color: var(--text);
+    }
+    .diff-box .d-same  { color: var(--text); }
+    .diff-box .d-add   { background: #bbf7d0; color: #14532d; border-radius: 3px; padding: 0 2px; }
+    .diff-box .d-del   { background: #fecaca; color: #7f1d1d; text-decoration: line-through; border-radius: 3px; padding: 0 2px; }
+    [data-theme="dark"] .diff-box .d-add { background: #14532d; color: #bbf7d0; }
+    [data-theme="dark"] .diff-box .d-del { background: #7f1d1d; color: #fecaca; }
+    .diff-legend {
+      display: flex; gap: 1rem; margin-top: .55rem; font-size: .72rem; color: var(--text-muted);
+    }
+    .diff-legend span { display: flex; align-items: center; gap: .3rem; }
+    .dl-add { width: 10px; height: 10px; background: #bbf7d0; border-radius: 2px; }
+    .dl-del { width: 10px; height: 10px; background: #fecaca; border-radius: 2px; }
+    [data-theme="dark"] .dl-add { background: #14532d; }
+    [data-theme="dark"] .dl-del { background: #7f1d1d; }
+
+    /* ================================================
+       WORD-BY-WORD BREAKDOWN
+    ================================================ */
+    #tgtText { display: none; } /* hide when word-view is active */
+    .word-view {
+      background: var(--bg);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: .8rem 1rem;
+      min-height: 170px;
+      line-height: 2.4;
+      font-size: .95rem;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      cursor: default;
+    }
+    .word-view.hidden { display: none; }
+    .w-token {
+      display: inline-block;
+      cursor: pointer;
+      border-radius: 4px;
+      padding: 0 2px;
+      transition: background var(--transition), color var(--transition);
+      position: relative;
+    }
+    .w-token:hover { background: var(--accent-soft); color: var(--accent); }
+    .w-token.active { background: var(--accent); color: #fff; }
+
+    /* Tooltip popup */
+    .word-tooltip {
+      position: fixed;
+      background: var(--surface);
+      border: 1.5px solid var(--accent);
+      border-radius: 10px;
+      padding: .7rem 1rem;
+      box-shadow: var(--shadow-md);
+      z-index: 500;
+      max-width: 260px;
+      min-width: 160px;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .18s ease, transform .18s ease;
+    }
+    .word-tooltip.show { opacity: 1; transform: translateY(0); }
+    .wt-word {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.05rem;
+      color: var(--accent);
+      margin-bottom: .3rem;
+    }
+    .wt-meaning {
+      font-size: .82rem;
+      color: var(--text);
+      line-height: 1.55;
+    }
+    .wt-loading { color: var(--text-muted); font-style: italic; font-size: .82rem; }
+
+    /* ================================================
+       BATCH TRANSLATOR
+    ================================================ */
+    .batch-section {
+      margin-top: 1.4rem;
+      display: none;
+    }
+    .batch-section.visible { display: block; animation: fadeIn .25s ease; }
+    .batch-title {
+      font-size: .72rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .08em;
+      color: var(--text-muted); margin-bottom: .7rem;
+      display: flex; align-items: center; gap: .5rem; flex-wrap: wrap;
+    }
+    .batch-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .5rem;
+      margin-bottom: .6rem;
+    }
+    @media (max-width: 680px) { .batch-grid { grid-template-columns: 1fr; } }
+    .batch-col-header {
+      font-size: .68rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .07em;
+      color: var(--accent); padding: .3rem .5rem;
+    }
+    .batch-row {
+      display: contents;
+    }
+    .batch-cell {
+      background: var(--bg2);
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem .85rem;
+      font-size: .9rem;
+      line-height: 1.6;
+      color: var(--text);
+      position: relative;
+    }
+    .batch-cell .line-num {
+      position: absolute; top: .45rem; left: .45rem;
+      font-size: .65rem; font-weight: 700;
+      color: var(--text-muted);
+      background: var(--border);
+      border-radius: 4px;
+      padding: .05rem .3rem;
+    }
+    .batch-cell.has-num { padding-left: 2.2rem; }
+    .batch-cell.tgt-cell { border-color: var(--accent); background: var(--accent-soft); }
+    [data-theme="dark"] .batch-cell.tgt-cell { background: var(--surface2); }
+    .batch-cell.loading-cell { color: var(--text-muted); font-style: italic; }
+    .batch-cell.error-cell { color: #ef4444; font-style: italic; }
+    .batch-progress-text {
+      font-size: .75rem; color: var(--text-muted); margin-top: .3rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     HEADER
+============================================================ -->
+<header>
+  <div class="brand">
+    <div class="brand-icon">🤖</div>
+    <div>
+      <div style="display:flex;align-items:center;gap:.4rem;">
+        <span class="brand-name">Harsha<em>AI</em></span>
+        <span class="brand-tag">Free</span>
+      </div>
+      <div style="font-size:.65rem;color:var(--text-muted);font-weight:500;letter-spacing:.03em;">Founded by Harsha</div>
+    </div>
+  </div>
+  <div class="hdr-btns">
+    <button class="hbtn" onclick="toggleFont()" title="Toggle accessibility font size">
+      <span>Aa</span><span id="fontLbl">Large</span>
+    </button>
+    <button class="hbtn" onclick="toggleDark()" title="Toggle dark mode">
+      <span id="darkIco">🌙</span><span id="darkLbl">Dark</span>
+    </button>
+  </div>
+</header>
+
+<!-- ============================================================
+     TAB BAR
+============================================================ -->
+<div class="tabbar">
+  <button class="tbtn active" id="tab-tr"    onclick="switchTab('tr')">🔄 Translate</button>
+  <button class="tbtn"        id="tab-batch" onclick="switchTab('batch')">📋 Batch</button>
+  <button class="tbtn"        id="tab-sum"   onclick="switchTab('sum')">✂️ Summarize</button>
+  <button class="tbtn"        id="tab-his"   onclick="switchTab('his')">📜 History <span id="hisBadge" style="background:var(--accent);color:#fff;border-radius:999px;padding:0 .45rem;font-size:.7rem;margin-left:.2rem;">0</span></button>
+</div>
+
+<!-- ============================================================
+     MAIN
+============================================================ -->
+<main>
+
+  <!-- ─────────────────────────────────────────
+       TRANSLATE PANEL
+  ───────────────────────────────────────── -->
+  <div class="panel active" id="panel-tr">
+    <div class="card">
+      <div class="card-title">
+        🔄 Translate Text
+        <span class="pill-tag">MyMemory · Free</span>
+      </div>
+
+      <div class="tr-grid">
+
+        <!-- Source -->
+        <div>
+          <label class="lbl">From language</label>
+          <select id="srcLang">
+            <option value="en">English</option>
+            <option value="ta">Tamil</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            <option value="ja">Japanese</option>
+          </select>
+          <div style="margin-top:.6rem">
+            <label class="lbl" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>Source text</span>
+              <span id="toneBadge" class="tone-badge">🎭 Tone</span>
+            </label>
+            <textarea id="srcText" placeholder="Type or paste text here…" oninput="onSrcInput()" maxlength="5000"></textarea>
+            <div class="limit-bar-wrap"><div class="limit-bar" id="limitBar"></div></div>
+            <div class="char-count" id="srcCount">0 / 5000 chars</div>
+          </div>
+        </div>
+
+        <!-- Middle: swap -->
+        <div class="tr-mid">
+          <button class="swap-btn" title="Swap languages" onclick="swapLangs()">⇄</button>
+        </div>
+
+        <!-- Target -->
+        <div>
+          <label class="lbl">To language</label>
+          <select id="tgtLang">
+            <option value="ta">Tamil</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            
+          </select>
+          <div style="margin-top:.6rem">
+            <label class="lbl" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>Translation</span>
+              <span style="font-size:.7rem;color:var(--text-muted);font-weight:500">💡 Click any word for meaning</span>
+            </label>
+            <textarea id="tgtText" readonly placeholder="Translation appears here…"></textarea>
+            <div class="word-view hidden" id="wordView"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Progress bar -->
+      <div class="progress-wrap" id="trProgress">
+        <div class="progress-bar" id="trBar"></div>
+      </div>
+
+      <!-- Actions -->
+      <div class="actions">
+        <button class="btn btn-primary" id="trBtn" onclick="doTranslate()">🔄 Translate</button>
+        <button class="btn btn-outline" id="formalityBtn" onclick="doFormalitySwitch()" disabled title="See 3 tone variations">🎚️ Tones</button>
+        <button class="btn btn-outline" onclick="copyField('tgtText')">📋 Copy</button>
+        <button class="btn btn-outline" onclick="downloadPDF('tr')">📄 PDF</button>
+        <button class="btn btn-wa"     onclick="shareWA('tr')">💬 WhatsApp</button>
+        <button class="btn btn-em"     onclick="shareEmail('tr')">✉️ Email</button>
+        <button class="btn btn-outline" onclick="clearTr()">🗑️ Clear</button>
+      </div>
+
+      <!-- Status -->
+      <div class="statusbar">
+        <div class="spin" id="trSpin"></div>
+        <span id="trStatus">Ready. Enter text and click Translate.</span>
+      </div>
+
+
+      <!-- ── Formality Switcher ── -->
+      <div class="formality-section" id="formalitySection">
+        <div class="formality-title">
+          🎚️ Formality Variations
+          <span class="pill-tag amber">3 Tones</span>
+        </div>
+        <div class="formality-grid">
+          <div class="formality-card">
+            <button class="formality-copy" onclick="copyFormalityCard('f-polite')" title="Copy">📋</button>
+            <div class="formality-card-label">🤝 Polite</div>
+            <div class="formality-card-text loading" id="f-polite">Translating…</div>
+          </div>
+          <div class="formality-card">
+            <button class="formality-copy" onclick="copyFormalityCard('f-casual')" title="Copy">📋</button>
+            <div class="formality-card-label">😊 Casual</div>
+            <div class="formality-card-text loading" id="f-casual">Translating…</div>
+          </div>
+          <div class="formality-card">
+            <button class="formality-copy" onclick="copyFormalityCard('f-professional')" title="Copy">📋</button>
+            <div class="formality-card-label">💼 Professional</div>
+            <div class="formality-card-text loading" id="f-professional">Translating…</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────
+       BATCH TRANSLATOR PANEL
+  ───────────────────────────────────────── -->
+  <div class="panel" id="panel-batch">
+    <div class="card">
+      <div class="card-title">
+        📋 Batch Line Translator
+        <span class="pill-tag">Line by Line</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-bottom:.8rem;">
+        <div>
+          <label class="lbl">From language</label>
+          <select id="batchSrcLang">
+            <option value="en">English</option>
+            <option value="ta">Tamil</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            
+          </select>
+        </div>
+        <div>
+          <label class="lbl">To language</label>
+          <select id="batchTgtLang">
+            <option value="ta">Tamil</option>
+            <option value="en">English</option>
+            <option value="hi">Hindi</option>
+            <option value="te">Telugu</option>
+            <option value="ml">Malayalam</option>
+            <option value="kn">Kannada</option>
+            
+          </select>
+        </div>
+      </div>
+
+      <label class="lbl">Paste numbered list (one item per line)</label>
+      <textarea id="batchInput" style="min-height:180px" oninput="onBatchInput()" placeholder="1. Hello, how are you?&#10;2. The weather is nice today.&#10;3. I love learning languages.&#10;4. Thank you very much."></textarea>
+      <div class="char-count" id="batchCount">0 lines</div>
+
+      <div class="actions" style="margin-top:.8rem;">
+        <button class="btn btn-primary" id="batchBtn" onclick="doBatchTranslate()">📋 Translate All Lines</button>
+        <button class="btn btn-outline" onclick="clearBatch()">🗑️ Clear</button>
+      </div>
+
+      <div class="statusbar">
+        <div class="spin" id="batchSpin"></div>
+        <span id="batchStatus">Paste a numbered list and click Translate All Lines.</span>
+      </div>
+
+      <!-- Results -->
+      <div class="batch-section visible" id="batchResults" style="display:none;margin-top:1rem;">
+        <div class="batch-grid" id="batchGrid">
+          <div class="batch-col-header">📝 Original</div>
+          <div class="batch-col-header">🌐 Translation</div>
+        </div>
+        <div class="batch-progress-text" id="batchProgressText"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Word tooltip (global, outside panels) -->
+  <div class="word-tooltip" id="wordTooltip">
+    <div class="wt-word" id="wtWord"></div>
+    <div class="wt-meaning" id="wtMeaning"></div>
+  </div>
+
+  <!-- ─────────────────────────────────────────
+       SUMMARIZE PANEL
+  ───────────────────────────────────────── -->
+  <div class="panel" id="panel-sum">
+    <div class="card">
+      <div class="card-title">
+        ✂️ Summarize Text
+        <span class="pill-tag amber">Offline · In-Browser</span>
+      </div>
+
+      <!-- Mode selector -->
+      <div class="mode-pills">
+        <button class="mpill active" id="mp-short"   onclick="setPill('short')">Short (2 sentences)</button>
+        <button class="mpill"        id="mp-medium"  onclick="setPill('medium')">Medium (5 sentences)</button>
+        <button class="mpill"        id="mp-bullets" onclick="setPill('bullets')">• Bullet Points</button>
+      </div>
+
+      <label class="lbl">Paste text to summarize</label>
+      <textarea id="sumIn" placeholder="Paste a paragraph, article, or any long text here…" style="min-height:200px" oninput="onSumInput()"></textarea>
+      <div class="char-count" id="sumCount">0 chars</div>
+
+      <div class="actions">
+        <button class="btn btn-primary" onclick="doSummarize()">✂️ Summarize</button>
+        <button class="btn btn-outline" onclick="copyOutput()">📋 Copy</button>
+        <button class="btn btn-outline" onclick="downloadPDF('sum')">📄 PDF</button>
+        <button class="btn btn-wa"     onclick="shareWA('sum')">💬 WhatsApp</button>
+        <button class="btn btn-em"     onclick="shareEmail('sum')">✉️ Email</button>
+        <button class="btn btn-outline" onclick="clearSum()">🗑️ Clear</button>
+      </div>
+
+      <div class="statusbar">
+        <div class="spin" id="sumSpin"></div>
+        <span id="sumStatus">Choose a mode, paste text, then click Summarize.</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📝 Summary</div>
+      <div class="output-box" id="sumOut">
+        <span class="placeholder">Your summary will appear here…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────
+       HISTORY PANEL
+  ───────────────────────────────────────── -->
+  <div class="panel" id="panel-his">
+    <div class="card">
+      <div class="card-title" style="justify-content:space-between;">
+        <span>📜 Translation History</span>
+        <button class="btn btn-outline" onclick="clearHistory()" style="font-size:.75rem;">🗑️ Clear All</button>
+      </div>
+      <div class="hist-grid" id="histList">
+        <div class="empty-hist">
+          <div class="icon">📭</div>
+          No translations yet — go translate something!
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+<script>
+/* ════════════════════════════════════════════════
+   LANGUAGE CODE MAP
+   MyMemory uses ISO 639-1 codes for langpair
+════════════════════════════════════════════════ */
+const LANG_NAMES = {
+  en: 'English', ta: 'Tamil', hi: 'Hindi',
+  te: 'Telugu',  ml: 'Malayalam', kn: 'Kannada', 
+};
+
+/* ════════════════════════════════════════════════
+   STATE
+════════════════════════════════════════════════ */
+let summaryMode = 'short';
+let history = JSON.parse(localStorage.getItem('harshaai_v1') || '[]');
+
+/* ════════════════════════════════════════════════
+   THEME TOGGLES
+════════════════════════════════════════════════ */
+function toggleDark() {
+  const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.documentElement.setAttribute('data-theme', dark ? 'light' : 'dark');
+  document.getElementById('darkIco').textContent = dark ? '🌙' : '☀️';
+  document.getElementById('darkLbl').textContent = dark ? 'Dark' : 'Light';
+}
+function toggleFont() {
+  const big = document.documentElement.getAttribute('data-large') === 'true';
+  document.documentElement.setAttribute('data-large', big ? 'false' : 'true');
+  document.getElementById('fontLbl').textContent = big ? 'Large' : 'Normal';
+}
+
+/* ════════════════════════════════════════════════
+   TAB SWITCHING
+════════════════════════════════════════════════ */
+function switchTab(name) {
+  ['tr','batch','sum','his'].forEach(n => {
+    document.getElementById('tab-'+n).classList.toggle('active', n === name);
+    document.getElementById('panel-'+n).classList.toggle('active', n === name);
+  });
+  if (name === 'his') renderHistory();
+  if (name === 'batch') onBatchInput();
+}
+
+/* ════════════════════════════════════════════════
+   CHAR COUNTERS
+════════════════════════════════════════════════ */
+function onSrcInput() {
+  const text = document.getElementById('srcText').value;
+  const n = text.length;
+  const el = document.getElementById('srcCount');
+  el.textContent = `${n} / 5000 chars`;
+  el.className = 'char-count' + (n > 4800 ? ' warn' : '');
+
+  // Limit bar
+  const bar = document.getElementById('limitBar');
+  const pct = Math.min((n / 5000) * 100, 100);
+  bar.style.width = pct + '%';
+  bar.className = 'limit-bar' + (pct > 96 ? ' over' : pct > 85 ? ' warn' : '');
+
+  // Tone detector (only when there's enough text)
+  if (n > 30) detectTone(text);
+  else hideTone();
+}
+
+/* ════════════════════════════════════════════════
+   TONE DETECTOR — heuristic keyword scoring
+════════════════════════════════════════════════ */
+const TONE_RULES = [
+  { tone: 'technical',  emoji: '⚙️', label: 'Technical',
+    words: ['function','algorithm','process','system','data','implement','configure','protocol','execute','parameter','module','variable','interface','database','server','api','code','error','debug','runtime'] },
+  { tone: 'formal',     emoji: '🎩', label: 'Formal',
+    words: ['hereby','pursuant','therefore','whereas','aforementioned','respectfully','sincerely','regards','acknowledge','request','inquire','assistance','correspondence','attached','regarding','accordance','furthermore','nevertheless','henceforth'] },
+  { tone: 'emotional',  emoji: '💛', label: 'Emotional',
+    words: ['love','hate','angry','sad','happy','excited','frustrated','disappointed','amazing','wonderful','terrible','miss','fear','hope','dream','heart','feel','cry','laugh','sorry','please','hurt','joy','worry'] },
+  { tone: 'casual',     emoji: '😎', label: 'Casual',
+    words: ['hey','hi','ok','okay','yeah','nah','lol','gonna','wanna','gotta','kinda','sorta','btw','tbh','ngl','stuff','thing','cool','awesome','dude','bro','totally','literally','whatever','sup'] },
+];
+
+function detectTone(text) {
+  const lower = text.toLowerCase();
+  const words = lower.match(/\b\w+\b/g) || [];
+  const total = words.length;
+  if (total < 5) { hideTone(); return; }
+
+  const scores = TONE_RULES.map(rule => {
+    const hits = words.filter(w => rule.words.includes(w)).length;
+    return { ...rule, score: hits / total };
+  });
+
+  const best = scores.reduce((a, b) => a.score > b.score ? a : b);
+  if (best.score === 0) { hideTone(); return; }
+
+  const badge = document.getElementById('toneBadge');
+  badge.textContent = best.emoji + ' ' + best.label;
+  badge.className = 'tone-badge visible ' + best.tone;
+}
+function hideTone() {
+  document.getElementById('toneBadge').className = 'tone-badge';
+}
+function onSumInput() {
+  const n = document.getElementById('sumIn').value.length;
+  document.getElementById('sumCount').textContent = `${n} chars`;
+}
+
+/* ════════════════════════════════════════════════
+   SWAP LANGUAGES + TEXT
+════════════════════════════════════════════════ */
+function swapLangs() {
+  const sL = document.getElementById('srcLang');
+  const tL = document.getElementById('tgtLang');
+  const sT = document.getElementById('srcText');
+  const tT = document.getElementById('tgtText');
+  [sL.value, tL.value] = [tL.value, sL.value];
+  [sT.value, tT.value] = [tT.value, sT.value];
+  onSrcInput();
+}
+
+/* ════════════════════════════════════════════════
+   PILL SELECTOR
+════════════════════════════════════════════════ */
+function setPill(mode) {
+  summaryMode = mode;
+  ['short','medium','bullets'].forEach(m =>
+    document.getElementById('mp-'+m).classList.toggle('active', m === mode)
+  );
+}
+
+/* ════════════════════════════════════════════════
+   STATUS + PROGRESS HELPERS
+════════════════════════════════════════════════ */
+function showProgress(pct) {
+  const wrap = document.getElementById('trProgress');
+  const bar  = document.getElementById('trBar');
+  if (pct === null) { wrap.classList.remove('on'); bar.style.width = '0%'; return; }
+  wrap.classList.add('on');
+  bar.style.width = pct + '%';
+}
+
+/* ════════════════════════════════════════════════
+   CLEAR
+════════════════════════════════════════════════ */
+function clearTr() {
+  document.getElementById('srcText').value = '';
+  document.getElementById('tgtText').value = '';
+  onSrcInput();
+  setStatus('tr', 'Cleared. Ready to translate.');
+  showProgress(null);
+  document.getElementById('formalitySection').classList.remove('visible');
+  document.getElementById('formalityBtn').disabled = true;
+  hideTone();
+  hideWordView();
+}
+function clearSum() {
+  document.getElementById('sumIn').value = '';
+  document.getElementById('sumOut').innerHTML = '<span class="placeholder">Your summary will appear here…</span>';
+  onSumInput();
+  setStatus('sum', 'Cleared. Paste text and click Summarize.');
+}
+
+/* ════════════════════════════════════════════════
+   TRANSLATION ENGINE — MyMemory Free API
+   • No API key required
+   • Hard limit ~500 chars per request
+   • We chunk long texts on sentence/word boundaries
+   • Rate-limit friendly: small sequential delays
+════════════════════════════════════════════════ */
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+const LANG_FULL = {
+  en: 'English', ta: 'Tamil', hi: 'Hindi',
+  te: 'Telugu',  ml: 'Malayalam', kn: 'Kannada', 
+};
+
+/* Single MyMemory request — max ~500 chars */
+async function myMemoryRequest(text, src, tgt) {
+  if (!text.trim()) return '';
+
+  const EMAIL = "vharsha3003@gmail.com"; // your MyMemory registered email
+
+  const langpair = `${src}|${tgt}`;
+
+  const url =
+    `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}` +
+    `&langpair=${encodeURIComponent(langpair)}` +
+    `&de=${encodeURIComponent(EMAIL)}`;
+
+  const resp = await fetch(url);
+
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+  const data = await resp.json();
+
+  if (data.responseStatus !== 200)
+    throw new Error(data.responseDetails || 'Translation error');
+
+  const translated = data.responseData?.translatedText;
+
+  if (!translated)
+    throw new Error('Empty response from API');
+
+  return translated;
+}
+
+/* Split text into chunks ≤ maxLen chars, preferring sentence/word boundaries */
+function splitIntoChunks(text, maxLen = 450) {
+  if (text.length <= maxLen) return [text];
+
+  const chunks = [];
+  // Try splitting on sentence endings first
+  const sentences = text.match(/[^.!?\n]+[.!?\n]*/g) || [text];
+
+  let current = '';
+  for (const sent of sentences) {
+    if ((current + sent).length <= maxLen) {
+      current += sent;
+    } else {
+      if (current.trim()) chunks.push(current.trim());
+      // If a single sentence is still too long, split on words
+      if (sent.length > maxLen) {
+        const words = sent.split(/\s+/);
+        let wordChunk = '';
+        for (const w of words) {
+          if ((wordChunk + ' ' + w).trim().length <= maxLen) {
+            wordChunk = (wordChunk + ' ' + w).trim();
+          } else {
+            if (wordChunk) chunks.push(wordChunk);
+            wordChunk = w;
+          }
+        }
+        current = wordChunk;
+      } else {
+        current = sent;
+      }
+    }
+  }
+  if (current.trim()) chunks.push(current.trim());
+  return chunks;
+}
+
+/* Main translate function — handles chunking automatically */
+async function myMemoryTranslate(text, src, tgt) {
+  if (!text.trim()) return '';
+  const chunks = splitIntoChunks(text, 450);
+  if (chunks.length === 1) return myMemoryRequest(chunks[0], src, tgt);
+
+  const results = [];
+  for (let i = 0; i < chunks.length; i++) {
+    const translated = await myMemoryRequest(chunks[i], src, tgt);
+    results.push(translated);
+    if (i < chunks.length - 1) await delay(300); // be nice to free API
+  }
+  return results.join(' ');
+}
+
+/* Thin wrapper used by back-translation & batch */
+async function translateChunked(text, src, tgt, onProgress) {
+  if (!text.trim()) return '';
+  if (onProgress) onProgress(30);
+  const result = await myMemoryTranslate(text, src, tgt);
+  if (onProgress) onProgress(90);
+  return result;
+}
+
+/* ════════════════════════════════════════════════
+   TRANSLATE
+════════════════════════════════════════════════ */
+async function doTranslate() {
+  const text = document.getElementById('srcText').value.trim();
+  const src  = document.getElementById('srcLang').value;
+  const tgt  = document.getElementById('tgtLang').value;
+
+  if (!text)       { toast('Please enter some text first.'); return; }
+  if (src === tgt) { toast('Source and target language are the same!'); return; }
+  if (text.length > 5000) { toast('Keep text under 5000 chars.'); return; }
+
+  const btn = document.getElementById('trBtn');
+  btn.disabled = true;
+  hideWordView();
+  setStatus('tr', `Translating ${LANG_FULL[src]} → ${LANG_FULL[tgt]}…`, true);
+  showProgress(20);
+
+  try {
+    const result = await myMemoryTranslate(text, src, tgt);
+
+    document.getElementById('tgtText').value = result;
+    renderWordView(result, src, tgt);
+
+    saveHistory({ src, tgt, srcText: text, tgtText: result });
+    showProgress(100);
+    setTimeout(() => showProgress(null), 500);
+    setStatus('tr', `✅ Translated: ${LANG_FULL[src]} → ${LANG_FULL[tgt]}`);
+
+    document.getElementById('formalityBtn').disabled = false;
+    document.getElementById('formalitySection').classList.remove('visible');
+
+  } catch (e) {
+    showProgress(null);
+    setStatus('tr', `❌ ${e.message}`);
+    toast('Translation failed.');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+
+
+/* ════════════════════════════════════════════════
+   FORMALITY SWITCHER — MyMemory + smart fallback
+   MyMemory doesn't support tone prompts, so we:
+   1. Get a base translation
+   2. Apply lightweight text transformations for
+      Polite (add respectful markers), Casual
+      (keep as-is / contractions), Professional
+      (sentence-cased, punctuation-cleaned)
+════════════════════════════════════════════════ */
+async function doFormalitySwitch() {
+  const srcText = document.getElementById('srcText').value.trim();
+  const src = document.getElementById('srcLang').value;
+  const tgt = document.getElementById('tgtLang').value;
+
+  if (!srcText) { toast('Enter source text first.'); return; }
+
+  const btn = document.getElementById('formalityBtn');
+  btn.disabled = true;
+  setStatus('tr', '🎚️ Generating 3 tone variations…', true);
+
+  const section = document.getElementById('formalitySection');
+  section.classList.add('visible');
+  ['f-polite','f-casual','f-professional'].forEach(id => {
+    const el = document.getElementById(id);
+    el.textContent = 'Translating…';
+    el.className = 'formality-card-text loading';
+  });
+
+  try {
+    // Get one base translation, then derive 3 tones
+    const base = await myMemoryTranslate(srcText.slice(0, 800), src, tgt);
+
+    // Polite: try a translated polite prefix phrase + base
+    let polite = base;
+    let casual  = base;
+    let professional = base;
+
+    // For English target: apply lightweight transforms
+    if (tgt === 'en') {
+      polite       = toPolite(base);
+      casual       = toCasual(base);
+      professional = toProfessional(base);
+    } else {
+      // For non-English targets: translate polite/casual/professional
+      // helper phrases into source lang, prepend, re-translate
+      // Fallback: use base for all, add tone markers
+      polite       = base;
+      casual        = base;
+      professional  = base;
+      // Try secondary translations for polite & professional
+      try {
+        const politePrefix = await myMemoryTranslate('Please, ' + srcText.slice(0, 700), src, tgt);
+        polite = politePrefix;
+      } catch(_) {}
+      try {
+        const profPrefix   = await myMemoryTranslate('Formally: ' + srcText.slice(0, 700), src, tgt);
+        professional = profPrefix;
+      } catch(_) {}
+    }
+
+    [['f-polite', polite], ['f-casual', casual], ['f-professional', professional]]
+      .forEach(([id, txt]) => {
+        const el = document.getElementById(id);
+        el.className = 'formality-card-text';
+        el.textContent = txt || base;
+      });
+
+    setStatus('tr', '✅ Tone variations ready.');
+  } catch(e) {
+    ['f-polite','f-casual','f-professional'].forEach(id => {
+      const el = document.getElementById(id);
+      el.className = 'formality-card-text loading';
+      el.textContent = '❌ Failed: ' + e.message;
+    });
+    setStatus('tr', '❌ Tone variation error.');
+  }
+
+  btn.disabled = false;
+}
+
+/* Lightweight English tone transforms */
+function toPolite(text) {
+  // Add "Please" if imperative-like, add "kindly" hedges
+  let t = text.trim();
+  if (/^[A-Z][a-z]/.test(t) && !t.startsWith('Please') && !t.startsWith('Could')) {
+    t = 'Please ' + t.charAt(0).toLowerCase() + t.slice(1);
+  }
+  return t.replace(/\bcan you\b/gi, 'could you please').replace(/\bdo\b/gi, 'kindly do');
+}
+function toCasual(text) {
+  return text.trim()
+    .replace(/\bI am\b/g, "I'm").replace(/\bYou are\b/g, "You're")
+    .replace(/\bdo not\b/gi, "don't").replace(/\bwill not\b/gi, "won't")
+    .replace(/\bcannot\b/gi, "can't").replace(/\bIt is\b/g, "It's")
+    .replace(/\bHello\b/g, 'Hey').replace(/\bGood morning\b/gi, 'Morning!');
+}
+function toProfessional(text) {
+  let t = text.trim();
+  // Capitalise first letter, ensure period at end
+  if (t.length > 0) t = t.charAt(0).toUpperCase() + t.slice(1);
+  if (!/[.!?]$/.test(t)) t += '.';
+  return t
+    .replace(/\bI'm\b/g, 'I am').replace(/\bYou're\b/g, 'You are')
+    .replace(/\bdon't\b/gi, 'do not').replace(/\bwon't\b/gi, 'will not')
+    .replace(/\bcan't\b/gi, 'cannot').replace(/\bIt's\b/g, 'It is')
+    .replace(/\bHey\b/g, 'Dear').replace(/\bkinda\b/gi, 'somewhat')
+    .replace(/\bgonna\b/gi, 'going to').replace(/\bwanna\b/gi, 'want to');
+}
+
+function copyFormalityCard(id) {
+  const text = document.getElementById(id)?.textContent;
+  if (text && text !== 'Translating…') doCopy(text);
+  else toast('Not ready yet.');
+}
+
+/* ════════════════════════════════════════════════
+   BATCH TRANSLATOR
+════════════════════════════════════════════════ */
+function parseBatchLines(raw) {
+  // Accept:  "1. text", "1) text", "- text", or plain lines
+  return raw.split('\n')
+    .map(l => l.trim())
+    .filter(l => l.length > 0)
+    .map(l => l.replace(/^(\d+[.)]\s*|[-•]\s*)/, '').trim())
+    .filter(l => l.length > 0);
+}
+
+function onBatchInput() {
+  const lines = parseBatchLines(document.getElementById('batchInput').value);
+  document.getElementById('batchCount').textContent = `${lines.length} line${lines.length !== 1 ? 's' : ''}`;
+}
+
+async function doBatchTranslate() {
+  const raw = document.getElementById('batchInput').value.trim();
+  if (!raw) { toast('Paste some lines first.'); return; }
+
+  const lines = parseBatchLines(raw);
+  if (lines.length === 0) { toast('No valid lines found.'); return; }
+  if (lines.length > 50) { toast('Maximum 50 lines per batch.'); return; }
+
+  const src = document.getElementById('batchSrcLang').value;
+  const tgt = document.getElementById('batchTgtLang').value;
+  if (src === tgt) { toast('Source and target language must differ.'); return; }
+
+  const btn = document.getElementById('batchBtn');
+  btn.disabled = true;
+
+  const resultsDiv = document.getElementById('batchResults');
+  const grid = document.getElementById('batchGrid');
+  const progressText = document.getElementById('batchProgressText');
+  resultsDiv.style.display = 'block';
+
+  // Build skeleton rows
+  grid.innerHTML = `
+    <div class="batch-col-header">📝 Original (${LANG_NAMES[src]})</div>
+    <div class="batch-col-header">🌐 Translation (${LANG_NAMES[tgt]})</div>
+  `;
+  const tgtCells = [];
+  lines.forEach((line, i) => {
+    const srcCell = document.createElement('div');
+    srcCell.className = 'batch-cell has-num';
+    srcCell.innerHTML = `<span class="line-num">${i+1}</span>${esc(line)}`;
+    const tgtCell = document.createElement('div');
+    tgtCell.className = 'batch-cell tgt-cell has-num loading-cell';
+    tgtCell.innerHTML = `<span class="line-num">${i+1}</span>Waiting…`;
+    grid.appendChild(srcCell);
+    grid.appendChild(tgtCell);
+    tgtCells.push(tgtCell);
+  });
+
+  setStatus('batch', `Translating ${lines.length} lines via MyMemory…`, true);
+
+  let done = 0, errors = 0;
+
+  // MyMemory is a free API — translate sequentially with a small delay to avoid rate limits
+  for (let i = 0; i < lines.length; i++) {
+    tgtCells[i].innerHTML = `<span class="line-num">${i+1}</span>Translating…`;
+    try {
+      const result = await myMemoryTranslate(lines[i], src, tgt);
+      tgtCells[i].className = 'batch-cell tgt-cell has-num';
+      tgtCells[i].innerHTML = `<span class="line-num">${i+1}</span>${esc(result)}`;
+    } catch(e) {
+      errors++;
+      tgtCells[i].className = 'batch-cell tgt-cell has-num error-cell';
+      tgtCells[i].innerHTML = `<span class="line-num">${i+1}</span>❌ ${esc(e.message || 'Failed')}`;
+    }
+    done++;
+    progressText.textContent = `${done}/${lines.length} done${errors ? ` · ${errors} error(s)` : ''}`;
+    if (i < lines.length - 1) await delay(350); // rate-limit friendly
+  }
+
+  const statusMsg = errors === 0
+    ? `✅ All ${lines.length} lines translated.`
+    : `⚠️ ${done - errors}/${lines.length} translated, ${errors} failed.`;
+  setStatus('batch', statusMsg);
+  btn.disabled = false;
+}
+
+function clearBatch() {
+  document.getElementById('batchInput').value = '';
+  document.getElementById('batchCount').textContent = '0 lines';
+  document.getElementById('batchResults').style.display = 'none';
+  setStatus('batch', 'Paste a numbered list and click Translate All Lines.');
+}
+
+function setStatus(id, msg, loading = false) {
+  const statusEl = document.getElementById(id+'Status');
+  const spinEl   = document.getElementById(id+'Spin');
+  if (statusEl) statusEl.textContent = msg;
+  if (spinEl)   spinEl.classList.toggle('on', loading);
+}
+
+/* ════════════════════════════════════════════════
+   WORD-BY-WORD BREAKDOWN
+════════════════════════════════════════════════ */
+let _wordTooltipTimer = null;
+let _wordMeaningCache = {};
+
+function renderWordView(translatedText, srcLang, tgtLang) {
+  const view = document.getElementById('wordView');
+  const ta   = document.getElementById('tgtText');
+
+  if (!translatedText.trim()) { hideWordView(); return; }
+
+  // Tokenise: split on spaces, keep punctuation attached but separately clickable
+  const tokens = translatedText.match(/[\w''-]+|[^\w\s]/g) || [];
+
+  view.innerHTML = tokens.map((tok, i) => {
+    const isWord = /[\w''-]{2,}/.test(tok);
+    if (isWord) {
+      return `<span class="w-token" data-word="${esc(tok)}" data-src="${srcLang}" data-tgt="${tgtLang}" data-idx="${i}" onclick="onWordClick(this, event)">${esc(tok)}</span> `;
+    }
+    return `<span class="d-same">${esc(tok)}</span>`;
+  }).join('');
+
+  view.classList.remove('hidden');
+  ta.style.display = 'none';
+}
+
+function hideWordView() {
+  const view = document.getElementById('wordView');
+  const ta   = document.getElementById('tgtText');
+  view.classList.add('hidden');
+  ta.style.display = '';
+  hideTooltip();
+}
+
+async function onWordClick(el, event) {
+  // Deactivate previous
+  document.querySelectorAll('.w-token.active').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+
+  const word = el.dataset.word;
+  const tgt  = el.dataset.tgt;  // language the translation is in
+  const src  = el.dataset.src;  // source language (translate word back to)
+
+  showTooltip(el, word, null); // show loading state
+
+  const cacheKey = `${word}|${tgt}|${src}`;
+  if (_wordMeaningCache[cacheKey]) {
+    showTooltip(el, word, _wordMeaningCache[cacheKey]);
+    return;
+  }
+
+  try {
+    // Use MyMemory to back-translate the word into the source language
+    const meaning = await myMemoryRequest(word, tgt, src);
+    const display = meaning && meaning !== word ? meaning : `(${word})`;
+    _wordMeaningCache[cacheKey] = display;
+    showTooltip(el, word, display);
+  } catch(e) {
+    showTooltip(el, word, '(lookup failed)');
+  }
+}
+
+function showTooltip(el, word, meaning) {
+  const tt      = document.getElementById('wordTooltip');
+  const wtWord  = document.getElementById('wtWord');
+  const wtMeaning = document.getElementById('wtMeaning');
+
+  wtWord.textContent = word;
+  if (meaning === null) {
+    wtMeaning.className = 'wt-loading';
+    wtMeaning.textContent = 'Looking up…';
+  } else {
+    wtMeaning.className = 'wt-meaning';
+    wtMeaning.textContent = '→ ' + meaning;
+  }
+
+  // Position near word element
+  const rect = el.getBoundingClientRect();
+  const ttW = 220;
+  let left = rect.left + window.scrollX;
+  let top  = rect.bottom + window.scrollY + 8;
+
+  if (left + ttW > window.innerWidth - 10) left = window.innerWidth - ttW - 10;
+  if (top + 80 > window.scrollY + window.innerHeight) top = rect.top + window.scrollY - 80;
+
+  tt.style.left = left + 'px';
+  tt.style.top  = top  + 'px';
+  tt.classList.add('show');
+}
+
+function hideTooltip() {
+  document.getElementById('wordTooltip').classList.remove('show');
+  document.querySelectorAll('.w-token.active').forEach(e => e.classList.remove('active'));
+}
+
+// Close tooltip on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.w-token') && !e.target.closest('.word-tooltip')) hideTooltip();
+});
+
+/* ════════════════════════════════════════════════
+   SUMMARIZE — pure client-side extractive TF-IDF
+   No API, no internet, works completely offline.
+════════════════════════════════════════════════ */
+function doSummarize() {
+  const text = document.getElementById('sumIn').value.trim();
+  if (!text)          { toast('Please paste some text first.'); return; }
+  if (text.length < 80){ toast('Text is too short to summarize.'); return; }
+
+  setStatus('sum', 'Summarizing…', true);
+
+  // Short delay so spinner renders before heavy JS
+  setTimeout(() => {
+    try {
+      const result = extractiveSummarize(text, summaryMode);
+      const outEl  = document.getElementById('sumOut');
+      outEl.textContent = result;
+      setStatus('sum', `✅ Summary ready (${summaryMode} mode).`);
+    } catch(e) {
+      setStatus('sum', '❌ Could not summarize — try shorter text.');
+    }
+  }, 30);
+}
+
+/* ── Extractive summarizer (TF-IDF sentence scoring) ── */
+function extractiveSummarize(text, mode) {
+  // 1. Split into sentences
+  const raw = text.replace(/\n+/g, ' ');
+  const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+  const cleaned   = sentences.map(s => s.trim()).filter(s => s.length > 20);
+
+  if (cleaned.length <= 2) {
+    // Text is already short — return as-is or truncated
+    return cleaned.join(' ');
+  }
+
+  // 2. Build word frequency map (TF)
+  const stopWords = new Set([
+    'the','a','an','is','it','in','on','at','to','of','and','or','but',
+    'for','with','this','that','was','are','be','by','from','as','we',
+    'he','she','they','i','you','our','their','has','have','had','not',
+    'its','will','been','were','which','who','can','do','did','so','if',
+    'up','out','all','more','also','than','then','into','about','there'
+  ]);
+
+  const wordFreq = {};
+  cleaned.forEach(s => {
+    s.toLowerCase().split(/\W+/).filter(w => w.length > 2 && !stopWords.has(w))
+      .forEach(w => { wordFreq[w] = (wordFreq[w] || 0) + 1; });
+  });
+
+  // 3. Score each sentence by sum of word frequencies
+  const scores = cleaned.map(sentence => {
+    const words = sentence.toLowerCase().split(/\W+/).filter(w => w.length > 2 && !stopWords.has(w));
+    const score = words.reduce((acc, w) => acc + (wordFreq[w] || 0), 0);
+    return score / Math.max(words.length, 1);  // normalise by sentence length
+  });
+
+  // 4. Decide how many top sentences to keep
+  let topN;
+  if (mode === 'short')   topN = Math.min(2, cleaned.length);
+  else if (mode === 'medium') topN = Math.min(5, cleaned.length);
+  else                    topN = Math.min(7, cleaned.length);  // bullets
+
+  // 5. Pick top-N sentence indices, preserve original order
+  const ranked = scores
+    .map((score, idx) => ({ score, idx }))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topN)
+    .map(x => x.idx)
+    .sort((a, b) => a - b);   // restore original order
+
+  const selected = ranked.map(i => cleaned[i]);
+
+  // 6. Format output
+  if (mode === 'bullets') {
+    return selected.map(s => '• ' + s.trim()).join('\n');
+  }
+  return selected.join(' ');
+}
+
+/* ════════════════════════════════════════════════
+   HISTORY
+════════════════════════════════════════════════ */
+function saveHistory(entry) {
+  entry.ts = new Date().toISOString();
+  history.unshift(entry);
+  if (history.length > 60) history = history.slice(0, 60);
+  localStorage.setItem('harshaai_v1', JSON.stringify(history));
+  document.getElementById('hisBadge').textContent = history.length;
+}
+
+function renderHistory() {
+  const list  = document.getElementById('histList');
+  document.getElementById('hisBadge').textContent = history.length;
+
+  if (!history.length) {
+    list.innerHTML = `<div class="empty-hist"><div class="icon">📭</div>No translations yet — go translate something!</div>`;
+    return;
+  }
+
+  list.innerHTML = history.map(h => `
+    <div class="hist-card">
+      <div class="hist-meta">
+        🕐 ${new Date(h.ts).toLocaleString()} &nbsp;·&nbsp; ${LANG_NAMES[h.src]} → ${LANG_NAMES[h.tgt]}
+      </div>
+      <div>
+        <div class="hist-lang">${LANG_NAMES[h.src]}</div>
+        <div class="hist-text">${esc(h.srcText.slice(0,180))}${h.srcText.length>180?'…':''}</div>
+      </div>
+      <div>
+        <div class="hist-lang">${LANG_NAMES[h.tgt]}</div>
+        <div class="hist-text">${esc(h.tgtText.slice(0,180))}${h.tgtText.length>180?'…':''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function clearHistory() {
+  if (!history.length) return;
+  if (!confirm('Clear all history?')) return;
+  history = [];
+  localStorage.removeItem('harshaai_v1');
+  renderHistory();
+  toast('History cleared.');
+}
+
+/* ════════════════════════════════════════════════
+   COPY
+════════════════════════════════════════════════ */
+function copyField(id) {
+  const el   = document.getElementById(id);
+  const text = el.tagName === 'TEXTAREA' ? el.value : el.textContent;
+  doCopy(text);
+  // Flash
+  el.classList.add('copy-flash');
+  setTimeout(() => el.classList.remove('copy-flash'), 400);
+}
+function copyOutput() {
+  const el = document.getElementById('sumOut');
+  const t  = el.innerText;
+  if (!t || t === 'Your summary will appear here…') { toast('Nothing to copy.'); return; }
+  doCopy(t);
+  el.classList.add('copy-flash');
+  setTimeout(() => el.classList.remove('copy-flash'), 400);
+}
+function doCopy(text) {
+  if (!text.trim()) { toast('Nothing to copy.'); return; }
+  navigator.clipboard.writeText(text)
+    .then(() => toast('✅ Copied!'))
+    .catch(() => {
+      // Fallback for old browsers
+      const ta = Object.assign(document.createElement('textarea'),{value:text,style:'position:fixed;opacity:0'});
+      document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta); toast('✅ Copied!');
+    });
+}
+
+/* ════════════════════════════════════════════════
+   PDF EXPORT (print dialog)
+════════════════════════════════════════════════ */
+function downloadPDF(panel) {
+  let title, body;
+  if (panel === 'tr') {
+    const src  = document.getElementById('srcText').value.trim();
+    const tgt  = document.getElementById('tgtText').value.trim();
+    if (!tgt) { toast('Translate something first.'); return; }
+    const sN = LANG_NAMES[document.getElementById('srcLang').value];
+    const tN = LANG_NAMES[document.getElementById('tgtLang').value];
+    title = `Harsha AI — ${sN} → ${tN}`;
+    body  = `<h2>${sN} (Original)</h2><p>${esc(src)}</p><h2>${tN} (Translation)</h2><p>${esc(tgt)}</p>`;
+  } else {
+    const sum = document.getElementById('sumOut').innerText.trim();
+    if (!sum || sum === 'Your summary will appear here…') { toast('Summarize something first.'); return; }
+    title = 'Harsha AI — Summary';
+    body  = `<h2>Summary</h2><p>${esc(sum).replace(/\n/g,'<br>')}</p>`;
+  }
+
+  const w = window.open('', '_blank');
+  w.document.write(`<!DOCTYPE html><html><head><title>${title}</title>
+    <style>
+      body{font-family:Georgia,serif;max-width:680px;margin:2rem auto;color:#111;line-height:1.8}
+      h1{font-size:1.5rem;margin-bottom:.3rem}
+      h2{font-size:1rem;color:#555;margin:1.5rem 0 .4rem;text-transform:uppercase;letter-spacing:.05em;font-size:.85rem}
+      p{font-size:1.05rem}
+      .meta{font-size:.75rem;color:#888;margin-bottom:2rem}
+    </style></head><body>
+    <h1>🌐 Harsha AI</h1>
+    <div class="meta">Generated ${new Date().toLocaleString()}</div>
+    ${body}
+    </body></html>`);
+  w.document.close();
+  w.focus();
+  setTimeout(() => { w.print(); w.close(); }, 600);
+}
+
+/* ════════════════════════════════════════════════
+   SHARE
+════════════════════════════════════════════════ */
+function getShareText(panel) {
+  if (panel === 'tr') {
+    const src = document.getElementById('srcText').value.trim();
+    const tgt = document.getElementById('tgtText').value.trim();
+    if (!tgt) { toast('Translate something first.'); return null; }
+    const sN = LANG_NAMES[document.getElementById('srcLang').value];
+    const tN = LANG_NAMES[document.getElementById('tgtLang').value];
+    return `🌐 Harsha AI Translation\n\n[${sN}]\n${src}\n\n[${tN}]\n${tgt}`;
+  } else {
+    const sum = document.getElementById('sumOut').innerText.trim();
+    if (!sum || sum === 'Your summary will appear here…') { toast('Summarize something first.'); return null; }
+    return `📝 Harsha AI Summary\n\n${sum}`;
+  }
+}
+function shareWA(panel) {
+  const t = getShareText(panel);
+  if (t) window.open('https://wa.me/?text=' + encodeURIComponent(t), '_blank');
+}
+function shareEmail(panel) {
+  const t = getShareText(panel);
+  if (t) window.location.href = `mailto:?subject=${encodeURIComponent('Harsha AI Output')}&body=${encodeURIComponent(t)}`;
+}
+
+/* ════════════════════════════════════════════════
+   TOAST
+════════════════════════════════════════════════ */
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2700);
+}
+
+/* ════════════════════════════════════════════════
+   UTIL
+════════════════════════════════════════════════ */
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Init ── */
+document.getElementById('hisBadge').textContent = history.length;
+</script>
+</body>
+</html>
